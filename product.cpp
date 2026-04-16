@@ -68,14 +68,36 @@ void viewProducts() {
     if (!file) return;
 
     Product product;
+    Product arr[100];
+    int count = 0;
 
     cout << "\nID\tName\tQuantity\tPrice\n";
 
     while (fread(&product, sizeof(Product), 1, file)) {
-        cout << product.id << "\t"
-             << product.name << "\t"
-             << product.quantity << "\t\t"
-             << product.price << "\n";
+        arr[count++] = product;
+    }
+
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = i + 1; j < count; j++) {
+            if (arr[i].quantity > arr[j].quantity) {
+                Product temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+
+    for (int i = 0; i < count; i++) {
+        cout << arr[i].id << "\t"
+            << arr[i].name << "\t"
+            << arr[i].quantity << "\t\t"
+            << arr[i].price;
+
+        if (arr[i].quantity < 5) {
+            cout << " !! Low Stock !! ";
+        }
+
+        cout << "\n";
     }
 
     fclose(file);
@@ -86,15 +108,16 @@ void searchProduct() {
     FILE *file = fopen(PRODUCT_FILE, "r");
     if (!file) return;
 
-    int id;
-    cout << "Enter Product ID: ";
-    cin >> id;
+    char searchName[50];
+    cin.ignore();
+    cout << "Enter Product Name: ";
+    cin.getline(searchName, sizeof(searchName));
 
     Product product;
     int found = 0;
 
     while (fread(&product, sizeof(Product), 1, file)) {
-        if (product.id == id) {
+        if (strstr(product.name, searchName)) {
             cout << "Found: " << product.name
                  << " | Qty: " << product.quantity
                  << " | Price: " << product.price << "\n";
@@ -103,7 +126,7 @@ void searchProduct() {
         }
     }
 
-    if (!found) cout << "Not found!\n";
+    if (!found) cout << "!! Not found !!\n";
 
     fclose(file);
 }
